@@ -4,9 +4,11 @@ from urllib.request import urlopen
 import json
 import os
 import plotly.express as px
+from functions import getData
 
 url = "https://maps.googleapis.com/maps/api/geocode/json?"
 googleAPIKey = os.getenv("googleMapsAPIKey")
+weatherAPIKey = os.getenv("weatherAPIKey")
 
 currentLocation = steval.get_geolocation()
 
@@ -31,9 +33,9 @@ except TypeError:
 
 st.title("Weather Forecast")
 try:
-    location = st.text_input("Location:", key="locationInput", value=accurateLocation)
+    location = st.text_input("Location:", key="locationInput", value=accurateLocation, placeholder="Enter location")
 except NameError:
-    location = st.text_input("Location:", key="locationInput")
+    location = st.text_input("Location:", key="locationInput", placeholder="Enter location")
 
 days = st.slider("Forecast Days", min_value=1, max_value=5, help="Select number of days to be forecast")
 option = st.selectbox("Select data to view", ("Temperature", "Weather"))
@@ -41,6 +43,8 @@ option = st.selectbox("Select data to view", ("Temperature", "Weather"))
 subText = (f"{option} for the next 24 hours in {location}") if days == 1 else (f"{option} for the next {days} days in {location}")
 
 st.header(subText, divider="rainbow")
+
+data = getData(weatherAPIKey, location, days, option)
 
 dates = ["2022-25-10", "2022-26-10", "2022-27-10"]
 temperatures = [22, 23, 21]
