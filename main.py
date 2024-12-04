@@ -10,6 +10,7 @@ url = "https://maps.googleapis.com/maps/api/geocode/json?"
 googleAPIKey = os.getenv("googleMapsAPIKey")
 weatherAPIKey = os.getenv("weatherAPIKey")
 
+# Return users current location
 currentLocation = steval.get_geolocation()
 
 try:
@@ -31,6 +32,7 @@ try:
 except TypeError:
     pass
 
+# Add title and other widgets
 st.title("Weather Forecast")
 try:
     location = st.text_input("Location:", key="locationInput", value=accurateLocation, placeholder="Enter location")
@@ -44,9 +46,26 @@ subText = (f"{option} for the next 24 hours in {location}") if days == 1 else (f
 
 st.header(subText, divider="rainbow")
 
-data = getData(weatherAPIKey, location, days, option)
+if location:
+    filteredData = getData(weatherAPIKey, location, days)
 
-dates = ["2022-25-10", "2022-26-10", "2022-27-10"]
-temperatures = [22, 23, 21]
-figure = px.line(x=dates, y=temperatures, labels={"x": "Date", "y": "Temperature (°C)"})
-st.plotly_chart(figure)
+    if option == "Temperature":
+        # Create temp plot
+        temperatures = [dict["main"]["temp"] for dict in filteredData] # returns all temperature data
+        dates = [dict["dt_txt"] for dict in filteredData] # gets all dates
+        figure = px.line(x=dates, y=temperatures, labels={"x": "Date", "y": "Temperature (°C)"})
+        st.plotly_chart(figure)
+    elif option == "Weather":
+        # Create weather diagram
+        conditions = [dict["weather"][0]["main"] for dict in filteredData]
+        images = {"Clear": "images/clear.png", "Clouds": "images/cloud.png", "Rain": "images/rain.png", "Snow": "images/snow.png"}
+        st.image([images[condition] for condition in conditions], width=100)
+        
+        
+        uniqueDates = list(set(dict["dt_txt"] for dict in filteredData))
+        uniqueDates = [date.split()[0] for date in uniqueDates]
+        uniqueDates = list(set(uniqueDates))
+        print(uniqueDates)
+        
+        for i in uniqueDates:
+            st.subheader(i, divider=True)
