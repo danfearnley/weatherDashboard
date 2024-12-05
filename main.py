@@ -5,6 +5,7 @@ import json
 import os
 import plotly.express as px
 from functions import getData
+from datetime import datetime
 
 url = "https://maps.googleapis.com/maps/api/geocode/json?"
 googleAPIKey = os.getenv("googleMapsAPIKey")
@@ -51,21 +52,20 @@ if location:
 
     if option == "Temperature":
         # Create temp plot
-        temperatures = [dict["main"]["temp"] for dict in filteredData] # returns all temperature data
-        dates = [dict["dt_txt"] for dict in filteredData] # gets all dates
+        temperatures = [dict["data"]["realTemp"] for dict in filteredData] # returns all temperature data
+        dates = [dict["dateTime"] for dict in filteredData] # gets all dates
         figure = px.line(x=dates, y=temperatures, labels={"x": "Date", "y": "Temperature (°C)"})
         st.plotly_chart(figure)
     elif option == "Weather":
         # Create weather diagram
-        conditions = [dict["weather"][0]["main"] for dict in filteredData]
         images = {"Clear": "images/clear.png", "Clouds": "images/cloud.png", "Rain": "images/rain.png", "Snow": "images/snow.png"}
-        st.image([images[condition] for condition in conditions], width=100)
-        
-        
-        uniqueDates = list(set(dict["dt_txt"] for dict in filteredData))
-        uniqueDates = [date.split()[0] for date in uniqueDates]
-        uniqueDates = list(set(uniqueDates))
-        print(uniqueDates)
-        
-        for i in uniqueDates:
-            st.subheader(i, divider=True)
+        date = ""
+        for item in filteredData:
+            if item["date"] != date: # only create subheader once for each date
+                date = item["date"]
+                formattedDate = datetime.strptime(date, "%Y-%m-%d").strftime("%A %d %B %Y")
+                st.subheader(formattedDate, divider=True)
+                cols = st.columns(8)
+            
+            st.text(item["data"]["time"])
+            st.image(images[item["data"]["weather"]], width=100)
