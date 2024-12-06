@@ -43,33 +43,33 @@ except NameError:
 days = st.slider("Forecast Days", min_value=1, max_value=5, help="Select number of days to be forecast")
 option = st.selectbox("Select data to view", ("Temperature", "Weather"))
 
-subText = (f"{option} for the next 24 hours in {location}") if days == 1 else (f"{option} for the next {days} days in {location}")
-
-st.header(subText, divider="rainbow")
-
-if location:
-    filteredData = getData(weatherAPIKey, location, days)
-
-    if option == "Temperature":
-        # Create temp plot
-        temperatures = [dict["data"]["realTemp"] for dict in filteredData] # returns all temperature data
-        dates = [dict["dateTime"] for dict in filteredData] # gets all dates
-        figure = px.line(x=dates, y=temperatures, labels={"x": "Date", "y": "Temperature (°C)"})
-        st.plotly_chart(figure)
-    elif option == "Weather":
-        # Create weather diagram
-        images = {"Clear": "images/clear.png", "Clouds": "images/cloud.png", "Rain": "images/rain.png", "Snow": "images/snow.png"}
-        date = ""
-        for index, item in enumerate(filteredData):
-            if item["date"] != date: # only create subheader once for each date
-                date = item["date"]
-                formattedDate = datetime.strptime(date, "%Y-%m-%d").strftime("%A %d %B %Y")
-                st.subheader(formattedDate, divider=True)
-                cols = st.columns(8)
-                x = 0
-            
-            with cols[x]:
-                st.text(item["data"]["time"])
-                st.image(images[item["data"]["weather"]], width=100)
-            
-            x += 1
+try:
+    if location:
+        filteredData = getData(weatherAPIKey, location, days)
+        subText = (f"{option} for the next 24 hours in {location.title()}") if days == 1 else (f"{option} for the next {days} days in {location.title()}")
+        st.header(subText, divider="rainbow")
+        if option == "Temperature":
+            # Create temp plot
+            temperatures = [dict["data"]["realTemp"] for dict in filteredData] # returns all temperature data
+            dates = [dict["dateTime"] for dict in filteredData] # gets all dates
+            figure = px.line(x=dates, y=temperatures, labels={"x": "Date", "y": "Temperature (°C)"})
+            st.plotly_chart(figure)
+        elif option == "Weather":
+            # Create weather diagram
+            images = {"Clear": "images/clear.png", "Clouds": "images/cloud.png", "Rain": "images/rain.png", "Snow": "images/snow.png"}
+            date = ""
+            for index, item in enumerate(filteredData):
+                if item["date"] != date: # only create subheader once for each date
+                    date = item["date"]
+                    formattedDate = datetime.strptime(date, "%Y-%m-%d").strftime("%A %d %B %Y")
+                    st.subheader(formattedDate, divider=True)
+                    cols = st.columns(8)
+                    x = 0
+                
+                with cols[x]:
+                    st.text(item["data"]["time"])
+                    st.image(images[item["data"]["weather"]], width=100)
+                
+                x += 1
+except KeyError:
+    st.subheader("You entered a non-existant place")
