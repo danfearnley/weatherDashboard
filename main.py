@@ -60,12 +60,16 @@ if location:
         # Create weather diagram
         images = {"Clear": "images/clear.png", "Clouds": "images/cloud.png", "Rain": "images/rain.png", "Snow": "images/snow.png"}
         date = ""
-        for item in filteredData:
+        for index, item in enumerate(filteredData):
             if item["date"] != date: # only create subheader once for each date
                 date = item["date"]
                 formattedDate = datetime.strptime(date, "%Y-%m-%d").strftime("%A %d %B %Y")
                 st.subheader(formattedDate, divider=True)
                 cols = st.columns(8)
+                x = 0
             
-            st.text(item["data"]["time"])
-            st.image(images[item["data"]["weather"]], width=100)
+            with cols[x]:
+                st.text(item["data"]["time"])
+                st.image(images[item["data"]["weather"]], width=100)
+            
+            x += 1
