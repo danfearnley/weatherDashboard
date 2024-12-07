@@ -24,4 +24,4 @@ def getData(weatherAPIKey, place, days, option=None):
     return filteredData
 
 if __name__ == "__main__":
-    print(getData("1274c280a3cd37b84c0ab3ca2791fd03", "Methley", 2, "Weather"))
+    print(getData("", "Methley", 2, "Weather"))
